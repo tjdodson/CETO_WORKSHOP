@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CETO Prompt Synthesizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        walmartBlue: '#0053e2',
+                        walmartYellow: '#ffc220',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800 flex flex-col">
+ 
+    <!-- Header -->
+    <header class="bg-walmartBlue text-white py-4 shadow-md border-b-4 border-walmartYellow">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            <h1 class="text-2xl font-bold uppercase tracking-wider">CETO Prompt Builder</h1>
+            <p class="text-xs text-blue-200 mt-1">Translate your physical cards into a command.</p>
+        </div>
+    </header>
+ 
+    <main class="max-w-3xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <div class="bg-white rounded-xl shadow-2xl p-6 border border-gray-200">
+            <p class="text-sm text-gray-500 mb-6 text-center">Look at the Fire and Expertise cards you drew. Fill in the blocks below to engineer your prompt.</p>
+ 
+            <div class="space-y-6">
+                <!-- Context -->
+                <div class="relative bg-blue-50 p-4 rounded-lg border border-blue-100 transition-all hover:shadow-md">
+                    <div class="absolute -top-3 left-4 bg-walmartBlue text-white font-bold px-3 py-1 rounded text-sm">
+                        C : Context
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600 mt-2 mb-2">What is the background?</label>
+                    <textarea id="inputC" rows="2" class="w-full border-2 border-gray-200 rounded p-2 focus:outline-none focus:border-walmartBlue transition-colors text-sm" placeholder="e.g., I am a store manager. A customer posted a photo of a messy apparel department..."></textarea>
+                </div>
+ 
+                <!-- Expertise -->
+                <div class="relative bg-yellow-50 p-4 rounded-lg border border-yellow-100 transition-all hover:shadow-md">
+                    <div class="absolute -top-3 left-4 bg-walmartYellow text-walmartBlue font-bold px-3 py-1 rounded text-sm">
+                        E : Expertise
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600 mt-2 mb-2">Who is the AI acting as?</label>
+                    <textarea id="inputE" rows="2" class="w-full border-2 border-gray-200 rounded p-2 focus:outline-none focus:border-walmartYellow transition-colors text-sm" placeholder="e.g., Act as an analytical, data-driven Retail Market Manager..."></textarea>
+                </div>
+ 
+                <!-- Task -->
+                <div class="relative bg-gray-50 p-4 rounded-lg border border-gray-200 transition-all hover:shadow-md">
+                    <div class="absolute -top-3 left-4 bg-gray-700 text-white font-bold px-3 py-1 rounded text-sm">
+                        T : Task
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600 mt-2 mb-2">What EXACTLY do you need it to do?</label>
+                    <textarea id="inputT" rows="2" class="w-full border-2 border-gray-200 rounded p-2 focus:outline-none focus:border-gray-700 transition-colors text-sm" placeholder="e.g., Draft a response email to my Market Manager outlining an immediate action plan..."></textarea>
+                </div>
+ 
+                <!-- Output -->
+                <div class="relative bg-green-50 p-4 rounded-lg border border-green-100 transition-all hover:shadow-md">
+                    <div class="absolute -top-3 left-4 bg-green-600 text-white font-bold px-3 py-1 rounded text-sm">
+                        O : Output
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600 mt-2 mb-2">What is the detailed tangible thing the AI should produce? What should it look/feel like?</label>
+                    <input type="text" id="inputO" class="w-full border-2 border-gray-200 rounded p-2 focus:outline-none focus:border-green-600 transition-colors text-sm" placeholder="e.g., 3 bullet points, professional and urgent tone, no buzzwords.">
+                </div>
+            </div>
+ 
+            <button id="generateBtn" class="w-full mt-8 bg-walmartBlue hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg transition-colors shadow-lg flex justify-center items-center text-lg">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Synthesize Final Prompt
+            </button>
+        </div>
+ 
+        <!-- Output Display Area -->
+        <div id="outputArea" class="mt-8 bg-gray-900 rounded-xl shadow-2xl p-6 hidden relative transition-all">
+            <h3 class="text-walmartYellow font-bold text-sm mb-3 uppercase tracking-wider flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Copy & Paste into AI:
+            </h3>
+            <div class="bg-gray-800 p-4 rounded border border-gray-700">
+                <p id="finalPromptText" class="text-green-400 text-sm font-mono leading-relaxed whitespace-pre-wrap"></p>
+            </div>
+            
+            <button id="copyBtn" class="w-full mt-4 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded transition-colors shadow">
+                Copy to Clipboard
+            </button>
+            <p id="copyAlert" class="text-center text-walmartYellow font-bold text-sm mt-3 hidden transition-opacity">✅ Prompt Copied! Open your AI tool and paste.</p>
+        </div>
+    </main>
+ 
+    <script>
+        // DOM Elements
+        const generateBtn = document.getElementById('generateBtn');
+        const outputArea = document.getElementById('outputArea');
+        const finalPromptText = document.getElementById('finalPromptText');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyAlert = document.getElementById('copyAlert');
+ 
+        // Logic: Generate Prompt
+        generateBtn.addEventListener('click', () => {
+            const c = document.getElementById('inputC').value.trim();
+            const e = document.getElementById('inputE').value.trim();
+            const t = document.getElementById('inputT').value.trim();
+            const o = document.getElementById('inputO').value.trim();
+ 
+            if (!c && !e && !t && !o) {
+                alert("Please fill in at least one CETO block to generate your prompt.");
+                return;
+            }
+ 
+            // Synthesize
+            let finalPrompt = "";
+            if (e) finalPrompt += `${e}\n\n`;
+            if (c) finalPrompt += `CONTEXT:\n${c}\n\n`;
+            if (t) finalPrompt += `TASK:\n${t}\n\n`;
+            if (o) finalPrompt += `OUTPUT FORMAT & TONE:\n${o}`;
+ 
+            finalPromptText.textContent = finalPrompt;
+            outputArea.classList.remove('hidden');
+            
+            // Scroll to output smoothly
+            setTimeout(() => {
+                outputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        });
+ 
+        // Logic: Copy to Clipboard
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = finalPromptText.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyAlert.classList.remove('hidden');
+                setTimeout(() => {
+                    copyAlert.classList.add('hidden');
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>
